@@ -83,7 +83,7 @@ func (t Tree) evalDeep() {
 	}
 }
 
-func main() {
+func dwarfs() {
 	// n: the number of relationships of influence
 	var n int
 	fmt.Scan(&n)
