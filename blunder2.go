@@ -96,7 +96,7 @@ func GetMaxCash(building Building, parentsGraph []Set) int {
 	return maxCashByRoom[len(building)-1]
 }
 
-func main() {
+func blunder2() {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Buffer(make([]byte, 1000000), 1000000)
 
