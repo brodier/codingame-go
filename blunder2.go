@@ -19,6 +19,11 @@ type Room struct {
 	door1 int
 	door2 int
 }
+type void struct{}
+
+type Set map[int]void
+
+var member void
 
 const EXIT = -1
 
@@ -44,37 +49,35 @@ func NewRoom(room string, idExit int) Room {
 	}
 	return newRoom
 }
-func selectRoom(maxCashByRoom []int, visitedRooms map[int]bool) int {
+func selectRoom(maxCashByRoom []int, visitedRooms Set) int {
 	var maxCashRoomId int
 	maxCashRoomId = 0
 	for id, cash := range maxCashByRoom {
-		if !visitedRooms[id] && cash > maxCashByRoom[maxCashRoomId] {
+		if _, ok := visitedRooms[id]; !ok && cash > maxCashByRoom[maxCashRoomId] {
 			maxCashRoomId = id
 		}
 	}
 	return maxCashRoomId
 }
 
-func GetMaxCash(building Building) int {
+func GetMaxCash(building Building, graph []Set) int {
+	N := len(building) - 1
 	maxCashByRoom := make([]int, len(building))
-	visitedRoom := make(map[int]bool, 0)
-	var currentRoom int
-	maxCashByRoom[currentRoom] = building[0].cash
-	for len(visitedRoom) < len(building) {
-		currentRoom = selectRoom(maxCashByRoom, visitedRoom) // Select current room (max cash value)
-		nb1 := building[currentRoom].door1
-		nb2 := building[currentRoom].door2
-		if maxCashByRoom[nb1] < building[nb1].cash+maxCashByRoom[currentRoom] {
-			maxCashByRoom[nb1] = building[nb1].cash + maxCashByRoom[currentRoom]
-			delete(visitedRoom, nb1)
-		}
-		if maxCashByRoom[nb2] < building[nb2].cash+maxCashByRoom[currentRoom] {
-			maxCashByRoom[nb2] = building[nb2].cash + maxCashByRoom[currentRoom]
-			delete(visitedRoom, nb2)
-		}
-		visitedRoom[currentRoom] = true
+	visitedRoom := make(Set, 0)
+	currentRoom := N
+	for room := range graph[N] {
+		maxCashByRoom[room] = building[room].cash
 	}
-	return maxCashByRoom[len(building)-1]
+	for currentRoom > 0 {
+		currentRoom = selectRoom(maxCashByRoom, visitedRoom) // Select current room (max cash value)
+		for room := range graph[currentRoom] {
+			if maxCashByRoom[room] < building[room].cash+maxCashByRoom[currentRoom] {
+				maxCashByRoom[room] = building[room].cash + maxCashByRoom[currentRoom]
+			}
+		}
+		visitedRoom[currentRoom] = member
+	}
+	return maxCashByRoom[0]
 }
 
 func main() {
@@ -85,11 +88,19 @@ func main() {
 	scanner.Scan()
 	fmt.Sscan(scanner.Text(), &N)
 	building := make(Building, N+1)
+	neighboors := make([]Set, N+1)
+	for i := 0; i < N+1; i++ {
+		neighboors[i] = make(Set, 0)
+	}
+
 	for i := 0; i < N; i++ {
 		scanner.Scan()
-		building[i] = NewRoom(scanner.Text(), N)
+		room := NewRoom(scanner.Text(), N)
+		neighboors[room.door1][i] = member
+		neighboors[room.door2][i] = member
+		building[i] = room
 	}
 	building[N] = NewRoom("E 0 E E", N)
 	fmt.Fprintf(os.Stderr, "Building %v\n", building)
-	fmt.Printf("%v\n", GetMaxCash(building)) // Write answer to stdout
+	fmt.Printf("%v\n", GetMaxCash(building, neighboors)) // Write answer to stdout
 }
