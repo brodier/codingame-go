@@ -207,7 +207,7 @@ func CheckLoop(step Step, previousSteps Path) bool {
  * the standard input according to the problem statement.
  **/
 
-func main() {
+func bundler() {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Buffer(make([]byte, 1000000), 1000000)
 
