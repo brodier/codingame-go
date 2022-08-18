@@ -49,35 +49,51 @@ func NewRoom(room string, idExit int) Room {
 	}
 	return newRoom
 }
-func selectRoom(maxCashByRoom []int, visitedRooms Set) int {
-	var maxCashRoomId int
-	maxCashRoomId = 0
-	for id, cash := range maxCashByRoom {
-		if _, ok := visitedRooms[id]; !ok && cash > maxCashByRoom[maxCashRoomId] {
-			maxCashRoomId = id
+func selectRoom(visitedRooms Set, parentsGraph []Set) int {
+	for i := 0; i < len(parentsGraph); i++ {
+		if _, v := visitedRooms[i]; !v {
+			selectable := true
+			for pId := range parentsGraph[i] {
+				if _, v := visitedRooms[pId]; !v {
+					selectable = false
+					break
+				}
+			}
+			if selectable {
+				return i
+			}
 		}
 	}
-	return maxCashRoomId
+	return len(parentsGraph)
 }
 
-func GetMaxCash(building Building, graph []Set) int {
-	N := len(building) - 1
-	maxCashByRoom := make([]int, len(building))
-	visitedRoom := make(Set, 0)
-	currentRoom := N
-	for room := range graph[N] {
-		maxCashByRoom[room] = building[room].cash
+func GetMaxRoomCash(maxCashByRoom []int, parents Set) int {
+	var maxCash int
+	for pId := range parents {
+		if maxCash < maxCashByRoom[pId] {
+			maxCash = maxCashByRoom[pId]
+		}
 	}
-	for currentRoom > 0 {
-		currentRoom = selectRoom(maxCashByRoom, visitedRoom) // Select current room (max cash value)
-		for room := range graph[currentRoom] {
-			if maxCashByRoom[room] < building[room].cash+maxCashByRoom[currentRoom] {
-				maxCashByRoom[room] = building[room].cash + maxCashByRoom[currentRoom]
-			}
+	return maxCash
+}
+
+func GetMaxCash(building Building, parentsGraph []Set) int {
+	maxCashByRoom := make([]int, len(building))
+	maxCashByRoom[0] = building[0].cash
+	visitedRoom := make(Set, 0)
+	visitedRoom[0] = member
+	var currentRoom int
+	for {
+		currentRoom = selectRoom(visitedRoom, parentsGraph)
+		if currentRoom == len(parentsGraph) {
+			break
+		}
+		if maxCash := GetMaxRoomCash(maxCashByRoom, parentsGraph[currentRoom]); maxCash > 0 {
+			maxCashByRoom[currentRoom] = maxCash + building[currentRoom].cash
 		}
 		visitedRoom[currentRoom] = member
 	}
-	return maxCashByRoom[0]
+	return maxCashByRoom[len(building)-1]
 }
 
 func main() {
