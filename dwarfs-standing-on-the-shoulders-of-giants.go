@@ -10,31 +10,31 @@ import (
  * the standard input according to the problem statement.
  **/
 
-type Tree map[int]*Node
+type Tree map[int]*Person
 
-type Node struct {
+type Person struct {
 	id          int
-	influencers []*Node
-	influencees []*Node
+	influencers []*Person
+	influencees []*Person
 	deepChan    chan int
 	maxDeep     int
 }
 
-func NewNode(id int) *Node {
-	n := Node{id: id}
-	n.influencees = make([]*Node, 0)
-	n.influencers = make([]*Node, 0)
+func NewPerson(id int) *Person {
+	n := Person{id: id}
+	n.influencees = make([]*Person, 0)
+	n.influencers = make([]*Person, 0)
 	n.deepChan = make(chan int)
 	n.maxDeep = 0
 	return &n
 }
 
-func applyInfluence(from *Node, to *Node) {
+func applyInfluence(from *Person, to *Person) {
 	from.influencees = append(from.influencees, to)
 	to.influencers = append(to.influencers, from)
 }
 
-func (n *Node) evalNbInfluencees(done chan int) {
+func (n *Person) evalNbInfluencees(done chan int) {
 	fmt.Fprintf(os.Stderr, "Start eval nb influencees for %d\n", n.id)
 	if len(n.influencees) == 0 {
 		for _, influencer := range n.influencers {
@@ -58,7 +58,7 @@ func (n *Node) evalNbInfluencees(done chan int) {
 	done <- 1
 }
 
-func (n Node) String() string {
+func (n Person) String() string {
 	var s string
 	s = fmt.Sprintf("%d:>[", n.id)
 	for _, i := range n.influencees {
@@ -93,10 +93,10 @@ func dwarfs() {
 		var x, y int
 		fmt.Scan(&x, &y)
 		if _, ok := tree[x]; !ok {
-			tree[x] = NewNode(x)
+			tree[x] = NewPerson(x)
 		}
 		if _, ok := tree[y]; !ok {
-			tree[y] = NewNode(y)
+			tree[y] = NewPerson(y)
 		}
 		applyInfluence(tree[x], tree[y])
 	}
