@@ -211,7 +211,7 @@ func (nw *Network) agentAt(a int) Link {
 	return nw.searchPriorityLink(&usedNodes, &endingNodes)
 }
 
-func main() {
+func mainDfsEp1() {
 	// N: the total number of nodes in the level, including the gateways
 	// L: the number of links
 	// E: the number of exit gateways
